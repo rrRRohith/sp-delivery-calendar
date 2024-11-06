@@ -225,6 +225,63 @@ function ShippingRulePickupBasedCalender($store_id = null,$type = null,$start_da
                     }
                     
                     
+                    if($isToday){
+                                if(strtotime(date("H:i")) <= strtotime($shippingRule->cutoff)){
+                                   
+                                    if($shippingRule->before_day == 0){
+                                        if(strtotime(date("H:i")) <= $opening_time){
+                                            $timeStrem = $opening_time; // store open time
+                                        }
+                                        else{
+                                            $timeStrem = strtotime(date("H:i"));    // current time
+                                        }
+                                    
+                                        $startingTime = date('H:i',$timeStrem + $preparetime);  // time + prep time
+                                           
+                                        if(strtotime($startingTime) <= $availableTime_to){
+                                            // if($startingTime > $opening_time){
+                                             if(strtotime($startingTime) > $opening_time){
+                                                $RoundavailableTime_on = strtotime($startingTime);
+                                                $availableTime_on = roundTimeToNearestInterval($RoundavailableTime_on, 900);
+                                            }
+                                            
+                                            if($availableTime_on <= $availableTime_to){
+                                                //$result .= '<span day="'.$currentDate->format('l').'" class="date today valid_date" data-start="'.date('H:i',$availableTime_on).'" data-end="'.date('H:i',$availableTime_to).'" data-date="' . $currentDate->format('Y-m-d') . '">' . $currentDate->format('j') . '</span>';
+                                            } 
+                                            else {
+                                                $isTimeExceeded = true;
+                                            }
+                                    
+                                        }
+                                        else{
+                                            $isTimeExceeded = true;
+                                        }
+                                    }
+                                    else{
+                                       $isTimeExceeded             = true;
+                                        $hasafterAvailable          = true;
+                                        $afterAvailable             = $today->copy()->addDay($shippingRule->before_day + $preSkipDay); 
+                                        $openingTimeAfterCuttoff    = strtotime($shippingRule->before_time); 
+                                    }
+                                    
+                                }
+                                else {
+                             
+                                    $isTimeExceeded             = true;
+                                    $hasafterAvailable          = true;
+                                    $afterAvailable             = $today->copy()->addDay($shippingRule->after_day + $preSkipDay); 
+                                    $openingTimeAfterCuttoff    = strtotime($shippingRule->after_time);
+                                           
+                                }
+                                
+                               
+                            }
+                    
+                    if(isset($afterAvailable) && $afterAvailable->gt($currentDate)) {
+                        
+                        $isDisabled = true;
+                    }
+                    
                     if($hasafterAvailable == true && $afterAvailable->format('Y-m-d') > $currentDate->format('Y-m-d')) {
                         $isDisabled = true;
                     }
@@ -505,6 +562,35 @@ function ShippingRuleDeliveryBasedCalender($start_date = null, $end_date = null,
                     // if($shippingRule->status == 0){
                     //     $isDisabled = true;
                     // }
+                    
+                    if ($isToday){  
+                            
+                                if(strtotime(date("H:i")) <= strtotime($shippingRule->cutoff)){
+                                    if($shippingRule->before_day == 0){
+                                        $result .= '<span day="'.$currentDate->format('l').'" class="date today valid_date" data-date="' . $currentDate->format('Y-m-d') . '">' . $currentDate->format('j') . '</span>';
+                                    }
+                                    else{
+                                       $isTimeExceeded             = true;
+                                        $hasafterAvailable          = true;
+                                        $afterAvailable             = $today->copy()->addDay($shippingRule->before_day+$preSkipDay); 
+                                        $openingTimeAfterCuttoff    = strtotime($shippingRule->before_time); 
+                                    }
+                                }
+                                else {
+                                 
+                                    $isTimeExceeded             = true;
+                                    $hasafterAvailable          = true;
+                                    $afterAvailable             = $today->copy()->addDay($shippingRule->after_day+$preSkipDay); 
+                                    $openingTimeAfterCuttoff    = strtotime($shippingRule->after_time);
+                                    
+                                }
+                                
+                        }
+                        
+                    if(isset($afterAvailable) && $afterAvailable->gt($currentDate)) {
+                        
+                        $isDisabled = true;
+                    }
                     
                     if($hasafterAvailable == true && $afterAvailable->format('Y-m-d') > $currentDate->format('Y-m-d')) {
                         $isDisabled = true;
